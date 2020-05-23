@@ -2,7 +2,7 @@
   "name": "health-monitor",
   "title": "Health Monitor",
   "description": "A simple spam bot that allert in chat you when health of token/actor changes.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Rockshow",
   "scripts": [
     "index.js"
