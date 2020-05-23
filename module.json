@@ -11,6 +11,6 @@
   "compatibleCoreVersion": "0.5.7",
   "url": "",
   "manifest": "https://raw.githubusercontent.com/rockshow888/health-monitor/master/module.json",
-  "download": "https://github.com/rockshow888/health-monitor/raw/master/health-monitor.zip"
+  "download": "https://github.com/rockshow888/health-monitor/blob/master/health-monitor.zip?raw=true"
 }
 
