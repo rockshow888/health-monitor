@@ -55,7 +55,7 @@ Hooks.on('updateToken', function(){
 	}
 });	
 //spam in chat if the actor is updated
-Hooks.on('updateActor', function(){ 
+/*Hooks.on('updateActor', function(){ 
 	const temp_hp = JSON.parse(JSON.stringify(current_hp));
     const maptokens = canvas.tokens.placeables;
 	var math = {};
@@ -83,7 +83,7 @@ Hooks.on('updateActor', function(){
 				ChatMessage.create(chatData);
 		}
 	}
-});	
+});	*/
 // This is for chat styling
 Hooks.on("renderChatMessage", (app, html, data) => { 
 	    var x = document.getElementsByClassName("message flexcol")
