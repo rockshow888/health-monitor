@@ -1,5 +1,5 @@
 var current_hp = {};  //array where hp of tokens are stored
-
+let chatData;
 //HP storing code for canvas load or token created
 Hooks.on('canvasReady', function(){
 	const maptokens = canvas.tokens.placeables;
@@ -38,24 +38,33 @@ Hooks.on('updateToken', function(){
 		math[i]=-(temp_hp[maptokens[i].data._id]-current_hp[maptokens[i].data._id]);
 		if(math[i]<0)
 		{
-			let chatData = 
+			chatData = 
 			{
 				content: ('<span class="hm_messagetaken">'+maptokens[i].actor.data.name + ' takes '+(-math[i])+' damage </span>')
+				
 			};
-			ChatMessage.create(chatData, {});
+			//ChatMessage.create(chatData, {});
 		}
 		if(math[i]>0)
 		{
-			let chatData = 
+			chatData = 
 			{
                 content: '<span class="hm_messageheal">'+maptokens[i].actor.data.name + ' heals '+(math[i])+' damage </span>' 
+				
 			};
-				ChatMessage.create(chatData);
+				//ChatMessage.create(chatData);
 		}
 	}
-});	
+	if((chatData)!== '') {
+	ChatMessage.create(chatData);	
+	}
+	console.log(math);
+	console.log(temp_hp);
+	console.log(current_hp);
+	chatData="";
+});
 //spam in chat if the actor is updated
-/*Hooks.on('updateActor', function(){ 
+Hooks.on('updateActor', function(){ 
 	const temp_hp = JSON.parse(JSON.stringify(current_hp));
     const maptokens = canvas.tokens.placeables;
 	var math = {};
@@ -63,30 +72,37 @@ Hooks.on('updateToken', function(){
 	{	
 			current_hp[maptokens[i].data._id]=maptokens[i].actor.data.data.attributes.hp.value;	
 	}
+	console.log("current hp riassegnati");console.log(current_hp);
 	for(i=0; i<canvas.tokens.placeables.length;i++)
 	{
 		math[i]=-(temp_hp[maptokens[i].data._id]-current_hp[maptokens[i].data._id]);
 		if(math[i]<0)
 		{
-			let chatData = 
+			chatData = 
 			{
-				content: ('<span class="hm_messagetaken">'+maptokens[i].actor.data.name + ' takes '+(-math[i])+' damage </span>')
+    			content: '<span class="hm_messagetaken">'+maptokens[i].actor.data.name + ' takes '+(-math[i])+' damage </span>',
 			};
-			ChatMessage.create(chatData, {});
+			//ChatMessage.create(chatData); chatData="";
 		}
 		if(math[i]>0)
 		{
-			let chatData = 
+			chatData = 
 			{
-                content: '<span class="hm_messageheal">'+maptokens[i].actor.data.name + ' heals '+(math[i])+' damage </span>' 
+				content: '<span class="hm_messageheal">'+maptokens[i].actor.data.name + ' heals '+(math[i])+' damage </span>' ,
 			};
-				ChatMessage.create(chatData);
-		}
+			//ChatMessage.create(chatData); chatData="";
+		}	
 	}
-});	*/
+	console.log(chatData);
+	if((chatData)!== '') {
+	ChatMessage.create(chatData);	
+	}
+	chatData="";
+});	
 // This is for chat styling
+
 Hooks.on("renderChatMessage", (app, html, data) => { 
-	    var x = document.getElementsByClassName("message flexcol")
+	    //var x = document.getElementsByClassName("message flexcol")
 		//console.log(x);
        
 	    if (html.find(".hm_messageheal").length) {
@@ -99,7 +115,6 @@ Hooks.on("renderChatMessage", (app, html, data) => {
 		html.css("padding", "2px");
 		html.css("border", "2px solid #191813d6");
 		html.find(".message-sender").text("");	
-		console.log(html.find(".message-metadata"));
 		html.find(".message-metadata")[0].style.display = "none";
 		}
 	    if (html.find(".hm_messagetaken").length) {
@@ -113,7 +128,8 @@ Hooks.on("renderChatMessage", (app, html, data) => {
 		html.css("border", "2px solid #191813d6");
 		html.find(".message-sender").text("");	
 		html.find(".message-metadata")[0].style.display = "none";
-		
 		}
 });
+	
+
 	
