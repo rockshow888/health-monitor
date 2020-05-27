@@ -1,120 +1,110 @@
-var current_hp = {};  //array where hp of tokens are stored
-let chatData="";
-let polymorph_prevent= 0;
+var current_hp_actor = {}; //store hp of PC
+var current_hp_npc = {}; //store hp of NPC
+
 //HP storing code for canvas load or token created
 Hooks.on('canvasReady', function(){
-	const maptokens = canvas.tokens.placeables;
-	for(i=0; i<canvas.tokens.placeables.length;i++)
-	{	
-		current_hp[maptokens[i].data._id]=maptokens[i].actor.data.data.attributes.hp.value;	
+	/*start collectting all PC hp information*/
+	let actors = game.actors.entities.filter(e=> e.data.type==='character');
+	for (actor of actors)
+	{
+		current_hp_actor[actor.data._id]={'hpvalue': actor.data.data.attributes.hp.value, 'hpmax': actor.data.data.attributes.hp.max, 'name': actor.data.name};
 	}
+	/*STOP collectting all PC hp information*/
+	
+	/*start collectting all PNG hp information*/	
+	let npc = canvas.tokens.placeables.filter(e=> e.actor.data.type==='npc');
+	for (actor of npc)
+	{
+		current_hp_npc[actor.data._id]={'hpvalue': actor.actor.data.data.attributes.hp.value, 'hpmax': actor.actor.data.data.attributes.hp.max, 'name': actor.data.name};
+	}
+	/*STOP collectting all PG hp information*/	
+	
+	const tokensOnMap = {};
 });
 Hooks.on('createToken', function(){
-   const maptokens = canvas.tokens.placeables;
-	for(i=0; i<canvas.tokens.placeables.length;i++)
-	{	
-		current_hp[maptokens[i].data._id]=maptokens[i].actor.data.data.attributes.hp.value;	
+	/*start collectting all PG hp information*/
+	let actors = game.actors.entities.filter(e=> e.data.type==='character');
+	for (actor of actors)
+	{
+		current_hp_actor[actor.data._id]={'hpvalue': actor.data.data.attributes.hp.value, 'hpmax': actor.data.data.attributes.hp.max, 'name': actor.data.name};
 	}
+	/*STOP collectting all PG hp information*/
+	
+	/*start collectting all PNC hp information*/	
+	let npc = canvas.tokens.placeables.filter(e=> e.actor.data.type==='npc');
+	for (actor of npc)
+	{
+		current_hp_npc[actor.data._id]={'hpvalue': actor.actor.data.data.attributes.hp.value, 'hpmax': actor.actor.data.data.attributes.hp.max, 'name': actor.data.name};
+	}
+	/*STOP collectting all PNC hp information*/	
 });	
-Hooks.on('preDeleteActor', x=> {
-	if(x.data.flags.dnd5e.isPolymorphed)
-	{
-		polymorph_prevent=1;
-	}
-});
 
-//spam in chat if token is updated
+
+//spam in chat if token (NPC) is updated
 Hooks.on("updateToken", (scene, token, updateData, options, userId) => { 
-	if(userId === game.user._id)
+	let chatData="";
+	if(userId === game.user._id) //only the USER that promoted the change will spam the message
 	{
-	const temp_hp = JSON.parse(JSON.stringify(current_hp));
-    const maptokens = canvas.tokens.placeables;
+	const temp_hp = JSON.parse(JSON.stringify(current_hp_npc)); //TEMP HP FOR THE MATH
 	var math = {};
-	for(i=0; i<canvas.tokens.placeables.length;i++)
-	{	
-		current_hp[maptokens[i].data._id]=maptokens[i].actor.data.data.attributes.hp.value;	
-	}
-	for(i=0; i<canvas.tokens.placeables.length;i++)
+	/*start collectting all PNC hp information*/	
+	let npc = canvas.tokens.placeables.filter(e=> e.actor.data.type==='npc');
+	for (actor of npc)
 	{
-		if(typeof maptokens[i].actor.data.flags.dnd5e !== 'undefined') 
-		{
-			if(typeof maptokens[i].actor.data.flags.dnd5e.isPolymorphed !== 'undefined') 
-			{
-				if(maptokens[i].actor.data.flags.dnd5e.isPolymorphed == true)
-				{
-				return; //If the target is polymorphed will interrupt updateToken
-				}
-			}	
-		}
-		//console.log(maptokens[i].actor.data.flags.dnd5e.isPolymorphed);
-		math[i]=-(parseInt(temp_hp[maptokens[i].data._id])-parseInt(current_hp[maptokens[i].data._id]));
-		if(math[i]<0)
+		current_hp_npc[actor.data._id]={'hpvalue': actor.actor.data.data.attributes.hp.value, 'hpmax': actor.actor.data.data.attributes.hp.max, 'name': actor.data.name};
+		math[actor.data._id]={'hpdif': (parseInt(temp_hp[actor.data._id].hpvalue) - parseInt(current_hp_npc[actor.data._id].hpvalue)), 'hpmaxdif': (parseInt(temp_hp[actor.data._id].hpmax) - parseInt(current_hp_npc[actor.data._id].hpmax))};
+	    if(math[actor.data._id].hpdif>0 && math[actor.data._id].hpmaxdif==0)
 		{
 			chatData = 
 			{
-				content: ('<span class="hm_messagetaken">'+maptokens[i].actor.data.name + ' takes '+(-math[i])+' damage </span>')
+				content: ('<span class="hm_messagetaken">'+ current_hp_npc[actor.data._id].name + ' takes '+(math[actor.data._id].hpdif)+' damage </span>')
 			};
 		}
-		if(math[i]>0)
+		if(math[actor.data._id].hpdif<0 && math[actor.data._id].hpmaxdif==0)
 		{
 			chatData = 
 			{
-                content: '<span class="hm_messageheal">'+maptokens[i].actor.data.name + ' heals '+(math[i])+' damage </span>' 
-				
+				content: ('<span class="hm_messageheal">'+ current_hp_npc[actor.data._id].name + ' heals '+(-math[actor.data._id].hpdif)+' damage </span>')
 			};
 		}
 	}
-	//console.log(maptokens);
-	if(polymorph_prevent==0)
-	{
-		if((chatData)!== '') {
+	if((chatData)!== '') {
 		ChatMessage.create(chatData, {});	
-		}
 	}
-	polymorph_prevent=0;
 	chatData="";
 	}
 });
 //spam in chat if the actor is updated
 Hooks.on('updateActor', (data, options, apps, userId) => { 
+	let chatData="";
 	if(userId === game.user._id)
 	{
-	const temp_hp = JSON.parse(JSON.stringify(current_hp));
-    const maptokens = canvas.tokens.placeables;
+	const temp_hp = JSON.parse(JSON.stringify(current_hp_actor)); //TEMP HP FOR THE MATH
+	console.log(temp_hp);
 	var math = {};
-	for(i=0; i<canvas.tokens.placeables.length;i++)
-	{	
-			current_hp[maptokens[i].data._id]=maptokens[i].actor.data.data.attributes.hp.value;
-			
-	}
-	//console.log("current hp riassegnati");console.log(current_hp);
-	for(i=0; i<canvas.tokens.placeables.length;i++)
+	let npc = game.actors.entities.filter(e=> e.data.type==='character');
+	for (actor of npc)
 	{
-
-		math[i]=-(parseInt(temp_hp[maptokens[i].data._id])-parseInt(current_hp[maptokens[i].data._id]));
-		if(math[i]<0)
+		current_hp_actor[actor.data._id]={'hpvalue': actor.data.data.attributes.hp.value, 'hpmax': actor.data.data.attributes.hp.max, 'name': actor.data.name};
+		math[actor.data._id]={'hpdif': (parseInt(temp_hp[actor.data._id].hpvalue) - parseInt(current_hp_actor[actor.data._id].hpvalue)), 'hpmaxdif': (parseInt(temp_hp[actor.data._id].hpmax) - parseInt(current_hp_actor[actor.data._id].hpmax))};
+	    if(math[actor.data._id].hpdif>0 && math[actor.data._id].hpmaxdif==0)
 		{
 			chatData = 
 			{
-    			content: '<span class="hm_messagetaken">'+maptokens[i].actor.data.name + ' takes '+(-math[i])+' damage </span>',
+				content: ('<span class="hm_messagetaken">'+ current_hp_actor[actor.data._id].name + ' takes '+(math[actor.data._id].hpdif)+' damage </span>')
 			};
 		}
-		if(math[i]>0)
+		if(math[actor.data._id].hpdif<0 && math[actor.data._id].hpmaxdif==0)
 		{
 			chatData = 
 			{
-				content: '<span class="hm_messageheal">'+maptokens[i].actor.data.name + ' heals '+(math[i])+' damage </span>' ,
+				content: ('<span class="hm_messageheal">'+ current_hp_actor[actor.data._id].name + ' heals '+(-math[actor.data._id].hpdif)+' damage </span>')
 			};
 		}
-			
 	}
-	if(polymorph_prevent==0)
-	{
-		if((chatData)!== '') {
+	if((chatData)!== '') {
 		ChatMessage.create(chatData, {});	
-		}
 	}
-	polymorph_prevent=0;
 	chatData="";
 	}
 });	
@@ -146,4 +136,5 @@ Hooks.on("renderChatMessage", (app, html, data) => {
 		html.find(".message-metadata")[0].style.display = "none";
 		}
 });
+	
 	
