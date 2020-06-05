@@ -43,7 +43,7 @@ Hooks.on('createToken', function(){
 //spam in chat if token (NPC) is updated
 Hooks.on("updateToken", (scene, token, updateData, options, userId) => { 
 	let chatData="";
-	if(userId === game.user._id) //only the USER that promoted the change will spam the message
+	if(game.user.isGM) //only the USER that promoted the change will spam the message
 	{
 	const temp_hp = JSON.parse(JSON.stringify(current_hp_npc)); //TEMP HP FOR THE MATH
 	var math = {};
@@ -77,7 +77,7 @@ Hooks.on("updateToken", (scene, token, updateData, options, userId) => {
 //spam in chat if the actor is updated
 Hooks.on('updateActor', (data, options, apps, userId) => { 
 	let chatData="";
-	if(userId === game.user._id)
+	if(game.user.isGM)
 	{
 	const temp_hp = JSON.parse(JSON.stringify(current_hp_actor)); //TEMP HP FOR THE MATH
 	console.log(temp_hp);
@@ -137,4 +137,4 @@ Hooks.on("renderChatMessage", (app, html, data) => {
 		}
 });
 	
-	
+
