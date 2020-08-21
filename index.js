@@ -91,11 +91,11 @@ Hooks.on("updateToken", (scene, token, updateData, options, userId) => {
         // Hide NPC name if it's not set to ALWAYS in its prototype token
         if (game.settings.get('health-monitor', 'npc_name') && actor.data.displayName != 50) {
           chatData = {
-            content: ('<span class="hm_messagetaken">' + ' Unknown entity' + ' takes ' + (math[actor.data._id].hpdif) + ' damage </span>')
+            content: ('<span class="hm_messagetaken">Unknown entity takes ' + (math[actor.data._id].hpdif) + ' damage</span>')
           };
         } else {
           chatData = {
-            content: ('<span class="hm_messagetaken">' + current_hp_npc[actor.data._id].name + ' takes ' + (math[actor.data._id].hpdif) + ' damage </span>')
+            content: ('<span class="hm_messagetaken">' + current_hp_npc[actor.data._id].name + ' takes ' + (math[actor.data._id].hpdif) + ' damage</span>')
           };
         }
       }
@@ -103,11 +103,11 @@ Hooks.on("updateToken", (scene, token, updateData, options, userId) => {
         // Hide NPC name if it's not set to ALWAYS in its prototype token
         if (game.settings.get('health-monitor', 'npc_name') && actor.data.displayName != 50) {
           chatData = {
-            content: ('<span class="hm_messageheal">' + ' Unknown entity' + ' heals ' + (-math[actor.data._id].hpdif) + ' damage </span>')
+            content: ('<span class="hm_messageheal">Unknown entity heals ' + (-math[actor.data._id].hpdif) + ' hit points</span>')
           };
         } else {
           chatData = {
-            content: ('<span class="hm_messageheal">' + current_hp_npc[actor.data._id].name + ' heals ' + (-math[actor.data._id].hpdif) + ' damage </span>')
+            content: ('<span class="hm_messageheal">' + current_hp_npc[actor.data._id].name + ' heals ' + (-math[actor.data._id].hpdif) + ' hit points</span>')
           };
         }
       }
