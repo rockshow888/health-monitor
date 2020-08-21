@@ -88,8 +88,8 @@ Hooks.on("updateToken", (scene, token, updateData, options, userId) => {
       };
 
       if (math[actor.data._id].hpdif > 0 && math[actor.data._id].hpmaxdif == 0) {
-
-        if (game.settings.get('health-monitor', 'npc_name') && actor.data.displayName == 0) {
+        // Hide NPC name if it's not set to ALWAYS in its prototype token
+        if (game.settings.get('health-monitor', 'npc_name') && actor.data.displayName != 50) {
           chatData = {
             content: ('<span class="hm_messagetaken">' + ' Unknown entity' + ' takes ' + (math[actor.data._id].hpdif) + ' damage </span>')
           };
@@ -100,7 +100,8 @@ Hooks.on("updateToken", (scene, token, updateData, options, userId) => {
         }
       }
       if (math[actor.data._id].hpdif < 0 && math[actor.data._id].hpmaxdif == 0) {
-        if (game.settings.get('health-monitor', 'npc_name') && actor.data.displayName == 0) {
+        // Hide NPC name if it's not set to ALWAYS in its prototype token
+        if (game.settings.get('health-monitor', 'npc_name') && actor.data.displayName != 50) {
           chatData = {
             content: ('<span class="hm_messageheal">' + ' Unknown entity' + ' heals ' + (-math[actor.data._id].hpdif) + ' damage </span>')
           };
