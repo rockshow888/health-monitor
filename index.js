@@ -19,15 +19,20 @@ Hooks.once('init', async function () {
 
 //spam in chat if token (NPC) is updated
 Hooks.on("preUpdateToken", async (scene, tokenData, update, options) => {
-	let hp = getProperty(update, "actorData.data.attributes.hp.value");
+	let hp = getProperty(update, "actorData.data.attributes.hp");
 	if (hp !== undefined) {
 		let actor = game.actors.get(tokenData.actorId)
 		let data = {
 			actorHP: getProperty(tokenData, "actorData.data.attributes.hp.value"),
+			actorTemp: getProperty(tokenData, "actorData.data.attributes.hp.temp"),
 			updateHP: update.actorData.data.attributes.hp.value,
+			updateTemp: getProperty(update, "actorData.data.attributes.hp.temp")
 		}
-		let hpChange = data.actorHP - data.updatedHP;
-		MessageCreate(hpChange, actor.data.name)
+		if(isNaN(data.actorTemp)) data.actorTemp = 0
+		if (isNaN(data.updateTemp)) data.updateTemp = data.actorTemp
+		if(isNaN(data.updateHP)) data.updateHP = data.actorHP
+		let change = (data.updateHP + data.updateTemp)- (data.actorHP + data.actorTemp)
+		MessageCreate(change, actor.data.name)
 	}
 });
 //spam in chat if the actor is updated
@@ -42,12 +47,10 @@ Hooks.on('preUpdateActor', async (actor, update, options, userId) => {
 			updateHP: update.data.attributes.hp.value,
 			updateTemp: getProperty(update, "data.attributes.hp.temp"),
 		};
-		let hpChange = data.actorHP - data.updateHP;
-		let tempChange = data.actorTemp - data.updateTemp;
-		if(isNaN(tempChange)) tempChange = 0
-		if(isNaN(hpChange)) hpChange = 0
-		let totalChange = -(hpChange + tempChange);
-		MessageCreate(totalChange, data.actor.data.name)
+		if (isNaN(data.updateTemp)) data.updateTemp = data.actorTemp
+		if(isNaN(data.updateHP)) data.updateHP = data.actorHP
+		let change = (data.updateHP + data.updateTemp)- (data.actorHP + data.actorTemp)
+		MessageCreate(change, data.actor.data.name)
 	}
 });
 // This is for chat styling
@@ -62,6 +65,7 @@ function MessageCreate(hpChange, name) {
 		}
 	}
 	if (hpChange < 0) {
+		hpChange = -hpChange
 		if (game.settings.get('health-monitor', 'npc_name')) {
 			content = '<span class="hm_messagetaken">' + ' Unknown entity' + ' takes ' + hpChange + ' damage </span>'
 		}
@@ -70,13 +74,13 @@ function MessageCreate(hpChange, name) {
 		}
 	}
 	let recipient;
-	if(game.settings.get('health-monitor', 'GM_Vision')) recipient = game.users.find((u) => u.isGM && u.active).id;
+	if (game.settings.get('health-monitor', 'GM_Vision')) recipient = game.users.find((u) => u.isGM && u.active).id;
 	let chatData = {
 		type: 4,
 		user: recipient,
 		speaker: { alias: "Health Monitor" },
 		content: content,
-		
+
 	};
 
 	ChatMessage.create(chatData, {});
