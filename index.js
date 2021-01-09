@@ -19,6 +19,8 @@ Hooks.once('init', async function () {
 
 //spam in chat if token (NPC) is updated
 Hooks.on("preUpdateToken", async (scene, tokenData, update, options) => {
+		let gm = game.user === game.users.find((u) => u.isGM && u.active)
+    if (!gm) return;
 	let hp = getProperty(update, "actorData.data.attributes.hp");
 	if (hp !== undefined) {
 		let actor = game.actors.get(tokenData.actorId)
@@ -80,6 +82,7 @@ function MessageCreate(hpChange, name) {
 		user: recipient,
 		speaker: { alias: "Health Monitor" },
 		content: content,
+		whisper: [recipient]
 
 	};
 
